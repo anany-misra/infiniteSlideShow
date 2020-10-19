@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
 import {Animated, Dimensions, FlexAlignType, Platform, View} from 'react-native';
-import {RecyclerListView,} from 'recyclerlistview';
+import {RecyclerListView} from 'recyclerlistview';
 import CustomBaseScrollView from './CustomBaseScrollView';
 import DefaultViewPageIndicator from './DefaultViewPageIndicator';
 import useDataState from "./hooks/useDataState";
@@ -9,12 +9,14 @@ import usePlayState from "./hooks/usePlayState";
 import {RecyclerListViewProps} from "recyclerlistview/dist/reactnative/core/RecyclerListView";
 import _scrollDirection from "./Utils";
 
+const WINDOW_CORRECTION_INSET = 20
 interface SlidShowProps {
     initialIndex: number,
     duration: number,
     multiplier: number,
     autoScroll?: boolean,
     disableIndicator?: boolean,
+    loop: boolean,
     items: any[],
     rowRenderer: (type: string | number, data: any, index: number) => null;
     style: {
@@ -43,22 +45,20 @@ const SlideShow = (
         indicatorStyle,
         autoScroll,
         disableIndicator,
-        recyclerViewProps
+        recyclerViewProps,
+        loop
     }: SlidShowProps
 ) => {
     const multiplierValidated = items.length === 1 ? 0 : multiplier
     const recyclerList = useRef(null)
     const intialialScrollIndex = (multiplierValidated / 2) * items.length + initialIndex
-    console.log('RESET CENTER INDEX -----=>', intialialScrollIndex)
     const [currentIndexFake, setCurrentIndexFake] = useState<number>(intialialScrollIndex)
-    const [oldOffset, setOldOffset] = useState<number>(Number.NEGATIVE_INFINITY)
-    const [selectedIndexAndroid, setSelectedIndexAndroid] = useState<number>(intialialScrollIndex)
     const [isPlaying, setIsPlaying] = usePlayState(autoScroll)
     const [_dataSource, _layoutProvider] = useDataState(items, multiplierValidated, style)
     const scrollValue = useRef(new Animated.Value(0));
 
     useEffect(() => {
-        if (autoScroll && isPlaying && multiplierValidated > 0) {
+        if (autoScroll && isPlaying && multiplierValidated > 0 && (loop || (currentIndexFake + 1) % items.length !== 0)) {
             const timerId = setTimeout(() => {
                 const updatedFakeIndex = (currentIndexFake + 1) % (multiplierValidated * items.length + 1)
                 recyclerList.current.scrollToIndex(updatedFakeIndex, true)
@@ -78,9 +78,10 @@ const SlideShow = (
     }
 
     const onPageSelected = (position) => {
+        console.log('current index: ', position)
         if (position === 0 || position === multiplierValidated * items.length) {
             const centerIndex = (multiplierValidated / 2) * items.length
-            scrollToIndex(centerIndex, false)
+            setTimeout(() => { scrollToIndex(centerIndex, false) }, 500)
         } else {
             // Its in case of else only because it will be called nextime if it is going into above if condition reason for that is scrollToIndex
             // currentIndexFake = item[0]
@@ -91,12 +92,11 @@ const SlideShow = (
     }
 
     const onVisibleIndicesChange = (item, p1, p2) => {
-        if (Platform.OS === 'ios' && item.length === 1) onPageSelected(item[0])
+        if (item.length === 1) onPageSelected(item[0])
     }
 
 
     const setScrollValue = (scroll: number) => {
-
 
         //Normalize value from fake index to actual index
         let value = Number(scroll.toFixed(4)) % items.length
@@ -108,33 +108,17 @@ const SlideShow = (
 
         scrollValue.current.setValue(value)
     }
-    const onSCroll = ({nativeEvent: {contentOffset: {x}}}) => {
-        //There is some issue in onVisibleIndicesChange its not working for android so same thing handled mannually by detecting selected index and others
-        if (Platform.OS === 'android') {
-            if (oldOffset === Number.NEGATIVE_INFINITY) {
-                setOldOffset(x)
-                return
-            }
-            //GEt direction
-            const direction = _scrollDirection(x, oldOffset)
-            const count = (x / itemWidth).toFixed(4)
-            //Get Number
-            const currentValue = direction < 0 ? Math.ceil(count) : Math.floor(count)
 
-            if (selectedIndexAndroid !== currentValue) {
-                setSelectedIndexAndroid(currentValue)
-                setOldOffset(x)
-                onPageSelected(currentValue)
-            }
-        }
+    const onScroll = ({nativeEvent: {contentOffset: {x}}}) => {
         setScrollValue(x / itemWidth)
-    };
+    }
+
     const onItemLayout = ({nativeEvent: {layout: {width}}}) => {
         itemWidth = width
     }
 
     const onScrollAnimationEnd = () => {
-        const {onScrollEndDrag} = recyclerViewProps || {}
+        const { onScrollEndDrag } = recyclerViewProps || {}
         onScrollEndDrag && onScrollEndDrag()
         setIsPlaying(true)
     }
@@ -142,6 +126,12 @@ const SlideShow = (
     const onScrollBeginDrag = () => {
         setIsPlaying(false)
     }
+
+    const applyWindowCorrection = (offsetX: number, offsetY: number, windowCorrection: { startCorrection: number, endCorrection: number}) => {
+        windowCorrection.startCorrection = WINDOW_CORRECTION_INSET
+        windowCorrection.endCorrection = -WINDOW_CORRECTION_INSET
+    }
+
     //Only render RLV once you have the data
     return (
         <View style={style}>
@@ -149,7 +139,7 @@ const SlideShow = (
                 {...recyclerViewProps}
                 initialRenderIndex={intialialScrollIndex}
                 onLayout={onItemLayout}
-                onScroll={onSCroll}
+                onScroll={onScroll}
                 ref={recyclerList}
                 isHorizontal
                 onScrollEndDrag={onScrollAnimationEnd}
@@ -159,6 +149,7 @@ const SlideShow = (
                 layoutProvider={_layoutProvider}
                 rowRenderer={rowRenderer}
                 onVisibleIndicesChanged={onVisibleIndicesChange}
+                applyWindowCorrection={applyWindowCorrection}
             />}
             {!disableIndicator && <View style={indicatorStyle}>
                 <DefaultViewPageIndicator activePage={0} pageCount={items.length} scrollOffset={0}
@@ -175,6 +166,7 @@ SlideShow.defaultProps = {
     multiplier: 0,
     autoScroll: true,
     disableIndicator: false,
+    loop: false,
     style: {
         width: Dimensions.get('screen').width,
         height: Dimensions.get('screen').height,
