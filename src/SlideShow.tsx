@@ -166,7 +166,7 @@ SlideShow.defaultProps = {
     multiplier: 0,
     autoScroll: true,
     disableIndicator: false,
-    loop: false,
+    loop: true,
     style: {
         width: Dimensions.get('screen').width,
         height: Dimensions.get('screen').height,
