@@ -7,6 +7,7 @@ interface SlidShowProps {
     multiplier: number;
     autoScroll?: boolean;
     disableIndicator?: boolean;
+    loop: boolean;
     items: any[];
     rowRenderer: (type: string | number, data: any, index: number) => null;
     style: {
@@ -23,13 +24,14 @@ interface SlidShowProps {
     };
 }
 declare const SlideShow: {
-    ({ initialIndex, duration, items, rowRenderer, multiplier, style, indicatorStyle, autoScroll, disableIndicator, recyclerViewProps }: SlidShowProps): JSX.Element;
+    ({ initialIndex, duration, items, rowRenderer, multiplier, style, indicatorStyle, autoScroll, disableIndicator, recyclerViewProps, loop }: SlidShowProps): JSX.Element;
     defaultProps: {
         initialIndex: number;
         duration: number;
         multiplier: number;
         autoScroll: boolean;
         disableIndicator: boolean;
+        loop: boolean;
         style: {
             width: number;
             height: number;
