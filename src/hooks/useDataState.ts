@@ -25,7 +25,7 @@ export default function useDataState(items: object[], multipler: number, {height
         for (; i < multipler; i++) {
             fakeItems = i === multipler-1 ? [...fakeItems, ...items, items[0]] : [...fakeItems, ...items]
         }
-        set_dataSource(dataProvider.cloneWithRows([...fakeItems, items[0]]))
+        set_dataSource(dataProvider.cloneWithRows([...fakeItems]))
         set_layoutProvider(new LayoutProvider(
             (index) => {
                 return 'FULL'
