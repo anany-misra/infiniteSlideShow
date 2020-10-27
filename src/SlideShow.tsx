@@ -78,7 +78,6 @@ const SlideShow = (
     }
 
     const onPageSelected = (position) => {
-        console.log('current index: ', position)
         if (position === 0 || position === multiplierValidated * items.length) {
             const centerIndex = (multiplierValidated / 2) * items.length
             setTimeout(() => { scrollToIndex(centerIndex, false) }, 500)
