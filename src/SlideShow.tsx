@@ -1,13 +1,12 @@
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
-import {Animated, Dimensions, FlexAlignType, Platform, View} from 'react-native';
+import {Animated, Dimensions, FlexAlignType, View} from 'react-native';
 import {RecyclerListView} from 'recyclerlistview';
 import CustomBaseScrollView from './CustomBaseScrollView';
 import DefaultViewPageIndicator from './DefaultViewPageIndicator';
 import useDataState from "./hooks/useDataState";
 import usePlayState from "./hooks/usePlayState";
 import {RecyclerListViewProps} from "recyclerlistview/dist/reactnative/core/RecyclerListView";
-import _scrollDirection from "./Utils";
 
 const WINDOW_CORRECTION_INSET = 20
 interface SlidShowProps {
@@ -61,7 +60,7 @@ const SlideShow = (
         if (autoScroll && isPlaying && multiplierValidated > 0 && (loop || (currentIndexFake + 1) % items.length !== 0)) {
             const timerId = setTimeout(() => {
                 const updatedFakeIndex = (currentIndexFake + 1) % (multiplierValidated * items.length + 1)
-                recyclerList.current.scrollToIndex(updatedFakeIndex, true)
+                scrollToIndex(updatedFakeIndex, true)
             }, duration)
             return () => clearTimeout(timerId)
         }
@@ -74,7 +73,7 @@ const SlideShow = (
 
     // let scrollValue = new Animated.Value(0)
     const scrollToIndex = (index: number, animation: boolean) => {
-        recyclerList.current.scrollToIndex(index, animation)
+        recyclerList && recyclerList.current && recyclerList.current.scrollToIndex(index, animation)
     }
 
     const onPageSelected = (position) => {
