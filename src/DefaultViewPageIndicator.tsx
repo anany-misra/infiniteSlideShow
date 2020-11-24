@@ -65,7 +65,7 @@ class DefaultViewPageIndicator extends React.Component<Props, State> {
 
     renderIndicator(page) {
         return (
-            <TouchableOpacity style={styles.tab} key={'idc_' + page} onPress={() => this.props.goToPage(page)}>
+            <TouchableOpacity style={styles.tab} key={'idc_' + page} onPress={() => this.props.goToPage && this.props.goToPage(page)}>
                 <View style={styles.dot}/>
             </TouchableOpacity>
         );
