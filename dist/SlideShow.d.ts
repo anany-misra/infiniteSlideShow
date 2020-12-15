@@ -9,7 +9,7 @@ interface SlidShowProps {
     disableIndicator?: boolean;
     loop: boolean;
     items: any[];
-    rowRenderer: (type: string | number, data: any, index: number) => null;
+    rowRenderer: (type: string | number, data: any, index: number, extendedState?: object) => null;
     style: {
         width: number;
         height: number;

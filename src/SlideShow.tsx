@@ -17,7 +17,7 @@ interface SlidShowProps {
     disableIndicator?: boolean,
     loop: boolean,
     items: any[],
-    rowRenderer: (type: string | number, data: any, index: number) => null;
+    rowRenderer: (type: string | number, data: any, index: number, extendedState?: object) => null;
     style: {
         width: number,
         height: number,
@@ -145,7 +145,7 @@ const SlideShow = (
                 externalScrollView={CustomBaseScrollView}
                 dataProvider={_dataSource}
                 layoutProvider={_layoutProvider}
-                rowRenderer={rowRenderer}
+                rowRenderer={(type: string | number, data: any, index: number, extendedState?: object) => rowRenderer(type, data, index%items.length, extendedState)}
                 onVisibleIndicesChanged={onVisibleIndicesChange}
                 applyWindowCorrection={applyWindowCorrection}
             />}
