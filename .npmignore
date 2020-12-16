@@ -1,2 +1,4 @@
-*
-!dist
+node_modules/
+ios/
+android/
+__tests__
