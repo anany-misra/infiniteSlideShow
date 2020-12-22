@@ -1,7 +1,8 @@
 import * as React from 'react';
 import {StyleSheet, Text, View, Dimensions, Button} from 'react-native';
-// import SlideShow from "./src/SlideShow";
-import SlideShow from "./dist/index";
+import SlideShow from "./src/SlideShow";
+import SlideShow1 from "./src/classcomponent/SlideShow1";
+// import SlideShow from "./dist/index";
 
 class App extends React.Component{
 
@@ -20,14 +21,14 @@ class App extends React.Component{
     };
 
     onPress = () => {
-        this.setState({items: [1]})
+        this.setState({items: [1, 2,3,4]})
     }
 
     render(): React.ReactNode {
         // alert('yes i am here!')
         return (
             <View>
-                <SlideShow
+                <SlideShow1
                     indicatorStyle={{
                         alignItems: 'center',
                         // position: 'absolute',
@@ -44,7 +45,7 @@ class App extends React.Component{
                     multiplier={4}
                     items={this.state.items}
                     rowRenderer={this.rowRenderer}/>
-                    <Button title={'Clicke me'} onPress={this.onPress}/>
+                    {/*<Button title={'Clicke me'} onPress={this.onPress}/>*/}
             </View>
 
         );

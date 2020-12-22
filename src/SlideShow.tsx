@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {Animated, Dimensions, FlexAlignType, View} from 'react-native';
 import {RecyclerListView} from 'recyclerlistview';
 import CustomBaseScrollView from './CustomBaseScrollView';
@@ -33,6 +33,7 @@ interface SlidShowProps {
 }
 
 let itemWidth: number
+let items: []
 const SlideShow = (
     {
         initialIndex,
@@ -89,11 +90,6 @@ const SlideShow = (
         }
     }
 
-    const onVisibleIndicesChange = (item, p1, p2) => {
-        if (item.length === 1) onPageSelected(item[0])
-    }
-
-
     const setScrollValue = (scroll: number) => {
 
         //Normalize value from fake index to actual index
@@ -130,6 +126,13 @@ const SlideShow = (
         windowCorrection.endCorrection = -WINDOW_CORRECTION_INSET
     }
 
+
+    const onVisibleIndicesChange = useCallback((item, p1, p2) => {
+        console.log('VISIBILE -> ', items, item, p1, p2)
+        if (item.length === 1) onPageSelected(item[0])
+    }, [items])
+
+    console.log('RENDER -> ', items)
     //Only render RLV once you have the data
     return (
         <View style={style}>
