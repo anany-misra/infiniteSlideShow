@@ -13,7 +13,7 @@ class App extends React.Component{
     rowRenderer = (type: number, data: any) => {
         return (
             <View style={styles.item}>
-                <Text>
+                <Text style={{fontSize: 92, fontWeight: "bold"}}>
                     {data}
                 </Text>
             </View>
@@ -29,15 +29,8 @@ class App extends React.Component{
         return (
             <View>
                 <SlideShow1
-                    indicatorStyle={{
-                        alignItems: 'center',
-                        // position: 'absolute',
-                        bottom: 10,
-                        left: 0,
-                        right: 0,
-                    }}
                     autoScroll={true}
-                    duration={3000}
+                    duration={5000}
                     style={{
                         height: 500,
                         width: Dimensions.get('screen').width

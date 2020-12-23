@@ -128,11 +128,9 @@ const SlideShow = (
 
 
     const onVisibleIndicesChange = useCallback((item, p1, p2) => {
-        console.log('VISIBILE -> ', items, item, p1, p2)
         if (item.length === 1) onPageSelected(item[0])
     }, [items])
 
-    console.log('RENDER -> ', items)
     //Only render RLV once you have the data
     return (
         <View style={style}>

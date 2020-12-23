@@ -26,11 +26,18 @@ class SlideShow1 extends React.Component<Props, State> {
     render() {
         return (
             <View>
-                <DuplicationItemsRecyclerView autoscroll={false} items={this.state.items} multiplier={2} loop={true} initialRenderIndex={this.state.initialIndex}/>
-                {/*<View style={{marginTop: 80}}>*/}
-                {/*    <Button title={'UPDATE INITIAL INDEX'} onPress={this.updateIndex}/>*/}
-                {/*    <Button title={'UPDATE ITEMS'} onPress={this.updateItems}/>*/}
-                {/*</View>*/}
+                <DuplicationItemsRecyclerView
+                    {...this.props}
+                    autoscroll={true}
+                    items={this.state.items}
+                    multiplier={2}
+                    loop={true}
+                    initialRenderIndex={this.state.initialIndex}
+                />
+                <View style={{marginTop: 80}}>
+                    <Button title={'UPDATE INITIAL INDEX'} onPress={this.updateIndex}/>
+                    <Button title={'UPDATE ITEMS'} onPress={this.updateItems}/>
+                </View>
             </View>
 
         );

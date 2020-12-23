@@ -1,21 +1,25 @@
 import * as React from "react";
 import {RecyclerListViewProps} from "recyclerlistview/dist/reactnative/core/RecyclerListView";
 import CustomBaseScrollView from "../CustomBaseScrollView";
-import {RecyclerListView} from "recyclerlistview";
+import {BaseLayoutProvider, DataProvider, RecyclerListView} from "recyclerlistview";
+import {convertToDataSource, getLayoutProvider} from "./Utils";
 
 export interface PagerViewState {
     currentIndex: number
-    currentInitialRenderIndex: number
-    items: any[]
+    _dataSource: DataProvider
+    _layoutProvider: BaseLayoutProvider
+    currentInitialRenderIndex: number//its been added just to compare in getDerivedState
+    items: any[]//its been added just to compare in getDerivedState
 }
 
 export interface PagerViewProps extends Partial<RecyclerListViewProps> {
     items: any[]
+    style: {width: number, height: number}
 }
 const WINDOW_CORRECTION_INSET = 20
 
 /**
- * This view duplicates the data for infinite scroll in case of single item we are not even using simple view as a container skip duplication logic if loop is false
+ * This view duplicates the data for infinite scroll in case of single item we are only using simple view as a container skip duplication logic if loop is false
  */
 class PagerView extends React.Component<PagerViewProps, PagerViewState> {
     private recyclerListRef: React.RefObject<RecyclerListView<any, any>>;
@@ -23,38 +27,69 @@ class PagerView extends React.Component<PagerViewProps, PagerViewState> {
     constructor(props: PagerViewProps) {
         super(props);
         this.recyclerListRef = React.createRef();
-
+        const {width, height} = props.style || {}
         this.state = {
             items: props.items,
             currentIndex: props.initialRenderIndex,
-            animating: false,
-            currentInitialRenderIndex: props.initialRenderIndex
+            currentInitialRenderIndex: props.initialRenderIndex,
+            _layoutProvider: getLayoutProvider({width, height}),
+            _dataSource: convertToDataSource(props.items)
         }
     }
 
-    static getDerivedStateFromProps(nextProps: PagerViewProps, prevState: PagerViewState) {
-        console.log('getDerivedStateFromProps -->', nextProps.initialRenderIndex)
-        if (nextProps.initialRenderIndex !== prevState.currentInitialRenderIndex
-        || nextProps.items !== prevState.items ) {
-            console.log('callllll -->', nextProps.items !== prevState.items, nextProps.initialRenderIndex !== prevState.currentInitialRenderIndex)
-            return {
+    /*componentWillReceiveProps(nextProps: Readonly<PagerViewProps>, nextContext: any) {
+        if (nextProps.initialRenderIndex !== this.state.currentInitialRenderIndex
+            || nextProps.items !== this.state.items ) {
+            const {width, height} = nextProps.style || {}
+            // console.log('callllll -->', nextProps.items, nextProps.initialRenderIndex)
+            const changeScrolledPos = this.state.currentInitialRenderIndex != nextProps.initialRenderIndex;
+            this.setState({
                 currentIndex: nextProps.initialRenderIndex,
                 items: nextProps.items,
-                currentInitialRenderIndex: nextProps.initialRenderIndex
-            };
+                currentInitialRenderIndex: nextProps.initialRenderIndex,
+                _layoutProvider: getLayoutProvider({width, height}),
+                _dataSource: convertToDataSource(nextProps.items)
+            }, () => {
+                if(changeScrolledPos) {
+                    setTimeout(() => {
+                        console.log('NEXT initialRenderIndex -->', nextProps.initialRenderIndex)
+                        this.scrollToIndex(nextProps.initialRenderIndex, false, 'ME')
+
+                    }, 0)
+                }
+            });
+
+
         } else return null;
-    }
+    }*/
 
 
-    scrollToIndex = (position: number, animation: boolean) => {
+        static getDerivedStateFromProps(nextProps: PagerViewProps, prevState: PagerViewState) {
+            if (nextProps.initialRenderIndex !== prevState.currentInitialRenderIndex
+            || nextProps.items !== prevState.items ) {
+                const {width, height} = nextProps.style || {}
+                console.log('callllll -->', nextProps.items, nextProps.initialRenderIndex)
+                return {
+                    currentIndex: nextProps.initialRenderIndex,
+                    items: nextProps.items,
+                    currentInitialRenderIndex: nextProps.initialRenderIndex,
+                    _layoutProvider: getLayoutProvider({width, height}),
+                    _dataSource: convertToDataSource(nextProps.items)
+                };
+            } else return null;
+        }
+
+
+    scrollToIndex = (position: number, animation: boolean, caller?: string) => {
         this.recyclerListRef.current.scrollToIndex(position, animation)
+        console.log('SCROLL -->', position, caller)
     }
 
-    onVisibleIndexesChanged = (all: number[]) => {
-        const {onVisibleIndexesChanged} = this.props
+    onVisibleIndicesChanged = (all: number[]) => {
+        const {onVisibleIndicesChanged} = this.props
         if (all.length === 1){
             this.setState({currentIndex: all[0]});
-            onVisibleIndexesChanged && onVisibleIndexesChanged(all, undefined, undefined)
+            onVisibleIndicesChanged && onVisibleIndicesChanged(all, undefined, undefined)
         }
     }
 
@@ -66,7 +101,9 @@ class PagerView extends React.Component<PagerViewProps, PagerViewState> {
 
     render() {
         const {items, ...rest} = this.props
-
+        const {_layoutProvider, _dataSource} = this.state
+        console.log('items', this.props.items)
+        // console.log('initialRenderIndex', rest.initialRenderIndex)
         return <RecyclerListView
             {...rest}
             ref={this.recyclerListRef}
@@ -74,7 +111,7 @@ class PagerView extends React.Component<PagerViewProps, PagerViewState> {
             externalScrollView={CustomBaseScrollView}
             dataProvider={_dataSource}
             layoutProvider={_layoutProvider}
-            onVisibleIndicesChanged={this.onVisibleIndexesChanged}
+            onVisibleIndicesChanged={this.onVisibleIndicesChanged}
             applyWindowCorrection={this.applyWindowCorrection}
         />
     }
@@ -112,7 +149,7 @@ class PagerView extends React.Component<PagerViewProps, PagerViewState> {
     moveToNext(animtion: boolean) {
         const {currentIndex} = this.state
         if (currentIndex == this.props.items.length-1) return;
-        this.scrollToIndex(currentIndex+1, animtion)
+        this.scrollToIndex(currentIndex+1, animtion, 'MOVE NEXT')
     }
 }
 

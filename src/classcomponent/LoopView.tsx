@@ -17,15 +17,15 @@ export type LoopViewProps = {
  */
 class LoopView extends React.Component<LoopViewProps, LoopViewState> {
     private pagerViewRef: React.RefObject<AutoScrollView>;
-
+    private previousItems: any[]
     constructor(props: LoopViewProps) {
         super(props);
+        this.previousItems = props.items
         this.pagerViewRef = React.createRef();
         this.state = {initialRenderIndex: props.initialRenderIndex, items: props.items}
     }
 
     static getDerivedStateFromProps(nextProps: LoopViewProps, prevState: LoopViewState): LoopViewState {
-        console.log('getDerivedStateFromProps -->', nextProps.initialRenderIndex)
         if (nextProps.initialRenderIndex !== prevState.initialRenderIndex
             || nextProps.items !== prevState.items ) {
             prevState.timer && clearInterval(prevState.timer)
@@ -37,14 +37,17 @@ class LoopView extends React.Component<LoopViewProps, LoopViewState> {
         } else return null;
     }
 
-    onVisibleIndexesChanged = (item) => {
-        if (item.length === 1) {
+    onVisibleIndicesChanged = (item) => {
+        //this.previousItems == this.state.items this is being added when datasource is updated its been called just ignore this call not required
+        if (item.length === 1 && (this.previousItems == this.state.items)) {
+            this.previousItems = this.state.items
             const {items} = this.props
+            console.log('ITEMS LOOPER', items, item[0])
             if (item[0] === 0 || item[0] === items.length-1) {
                 const centerIndex = Math.floor(items.length / 2)
                 this.setState({timer: setTimeout(() => {
-                        this.pagerViewRef.current.scrollToIndex(centerIndex, false)
-                    }, 3000)})
+                        this.pagerViewRef.current.scrollToIndex(centerIndex, false, 'LOOPER')
+                    }, 200)})
             }
             //TODO: paad onpage selected properly
         }
@@ -56,7 +59,7 @@ class LoopView extends React.Component<LoopViewProps, LoopViewState> {
         return <AutoScrollView
             ref={this.pagerViewRef}
             {...rest}
-            onVisibleIndexesChanged={loop && this.onVisibleIndexesChanged}
+            onVisibleIndicesChanged={loop && this.onVisibleIndicesChanged}
         />
     }
 }
