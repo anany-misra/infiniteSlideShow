@@ -1,49 +1,43 @@
 import * as React from "react";
-import PagerView, {PagerViewProps, PagerViewState} from "./PagerView";
 import AutoScrollView, {AutoScrollViewProps} from "./AutoScrollView";
+import ContainerView from "./ContainerView";
 
 export interface LoopViewState {
-    initialRenderIndex: number
     items: any[]
     timer?: NodeJS.Timeout
 }
 
-export type LoopViewProps = {
+export type LoopViewProps<ITEM, CONTAINER_PROPS> = {
     loop: boolean
-} & AutoScrollViewProps
+} & AutoScrollViewProps<ITEM, CONTAINER_PROPS>
 
 /**
  * This view duplicates the data for infinite scroll in case of single item we are not even using simple view as a container skip duplication logic if loop is false
  */
-class LoopView extends React.Component<LoopViewProps, LoopViewState> {
-    private pagerViewRef: React.RefObject<AutoScrollView>;
-    private previousItems: any[]
-    constructor(props: LoopViewProps) {
+class LoopView<ITEM, CONTAINER_PROPS, CONTAINER_TYPE extends ContainerView<ITEM, CONTAINER_PROPS>> extends React.Component<LoopViewProps<ITEM, CONTAINER_PROPS>, LoopViewState> {
+    private pagerViewRef: React.RefObject<AutoScrollView<ITEM, CONTAINER_PROPS>>;
+    private previousItems: ITEM[]
+    constructor(props: LoopViewProps<ITEM, CONTAINER_PROPS>) {
         super(props);
         this.previousItems = props.items
         this.pagerViewRef = React.createRef();
-        this.state = {initialRenderIndex: props.initialRenderIndex, items: props.items}
+        this.state = {items: props.items}
     }
 
-    static getDerivedStateFromProps(nextProps: LoopViewProps, prevState: LoopViewState): LoopViewState {
-        if (nextProps.initialRenderIndex !== prevState.initialRenderIndex
-            || nextProps.items !== prevState.items ) {
-            prevState.timer && clearInterval(prevState.timer)
+    UNSAFE_componentWillReceiveProps(nextProps: Readonly<LoopViewProps<ITEM,CONTAINER_PROPS>>, nextContext: any) {
+        if (nextProps.items !== this.state.items ) {
+            this.state.timer && clearInterval(this.state.timer)
             return {
-                initialRenderIndex: nextProps.initialRenderIndex,
                 items: nextProps.items,
                 timer: undefined,
             };
-        } else return null;
+        }
     }
-
-    onVisibleIndicesChanged = (item) => {
+    onPageSelected = (index: number): void => {
         //this.previousItems == this.state.items this is being added when datasource is updated its been called just ignore this call not required
-        if (item.length === 1 && (this.previousItems == this.state.items)) {
-            this.previousItems = this.state.items
+        if (this.previousItems == this.state.items) {
             const {items} = this.props
-            console.log('ITEMS LOOPER', items, item[0])
-            if (item[0] === 0 || item[0] === items.length-1) {
+            if (index === 0 || index === items.length-1) {
                 const centerIndex = Math.floor(items.length / 2)
                 this.setState({timer: setTimeout(() => {
                         this.pagerViewRef.current.scrollToIndex(centerIndex, false, 'LOOPER')
@@ -51,15 +45,16 @@ class LoopView extends React.Component<LoopViewProps, LoopViewState> {
             }
             //TODO: paad onpage selected properly
         }
+        this.previousItems = this.state.items
     }
 
     render() {
         const {loop, ...rest} = this.props
 
-        return <AutoScrollView
+        return <AutoScrollView<ITEM, CONTAINER_PROPS>
             ref={this.pagerViewRef}
             {...rest}
-            onVisibleIndicesChanged={loop && this.onVisibleIndicesChanged}
+            onPageSelected={loop && this.onPageSelected}
         />
     }
 }

@@ -1,24 +1,3 @@
-import {DataProvider, LayoutProvider} from "recyclerlistview";
-
-export const getLayoutProvider = ({width, height}: {width: number, height: number}) => {
-    return new LayoutProvider(
-        (index) => {
-            return 'FULL'
-        },
-        (type, dim) => {
-            dim.width = width
-            dim.height = height
-        }
-    )
-}
-const dataProvider = new DataProvider((r1, r2) => {
-    return r1 !== r2;
-});
-
-export const convertToDataSource = (items: any[]) => {
-    return dataProvider.cloneWithRows(items)
-}
-
 /**
  * Duplicate items based on multiplyer and calculate fare intial index(in duplicated items)
  * @param items
@@ -38,4 +17,19 @@ export const getDuplicatedItems = (items: any[], multipler: number, loop: boolea
     //calculate fair initialRenderIndex in case of duplicate items
     const initialRenderIndexFare = Math.floor(fakeItems.length / 2) + initialRenderIndex;
     return [initialRenderIndexFare, fakeItems];
+}
+/**
+ * Give scroll value in bouded manner only so that indicator doesn't over flow
+ * @param scroll
+ * @param index
+ * @param size
+ */
+export const getBoundedScroll = (scroll: number, index: number, size: number) => {
+    //Normalize value from fake index to actual index
+    let value = Number(scroll.toFixed(4)) % size
+    if (value < 0) value = 0
+    //Don't animate if you are at actual index 0 in left size and last index in right side
+    if (value > size - 1) value = index % size === 0 ? 0 : size - 1
+
+    return value
 }

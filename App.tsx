@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {StyleSheet, Text, View, Dimensions, Button} from 'react-native';
-import SlideShow from "./src/SlideShow";
-import SlideShow1 from "./src/classcomponent/SlideShow1";
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import Example from "./src/classcomponent/Example";
+
 // import SlideShow from "./dist/index";
 
 class App extends React.Component{
@@ -27,19 +27,10 @@ class App extends React.Component{
     render(): React.ReactNode {
         // alert('yes i am here!')
         return (
-            <View>
-                <SlideShow1
-                    autoScroll={true}
-                    duration={5000}
-                    style={{
-                        height: 500,
-                        width: Dimensions.get('screen').width
-                    }}
-                    multiplier={4}
-                    items={this.state.items}
-                    rowRenderer={this.rowRenderer}/>
-                    {/*<Button title={'Clicke me'} onPress={this.onPress}/>*/}
-            </View>
+            <ScrollView>
+                <Example />
+            </ScrollView>
+
 
         );
     }

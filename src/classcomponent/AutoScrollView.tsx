@@ -1,17 +1,17 @@
 import * as React from "react";
-import PagerView, {PagerViewProps} from "./PagerView";
+import {ContainerViewProps} from "./ContainerView";
+import CarouselContainer from "./recyclers/CarouselContainer";
 
 export interface AutoScrollViewState {
     autoscroll?: boolean
     duration?: number
     isDragging?: boolean
-    timerInterval?: NodeJS.Timeout
 }
 
-export type AutoScrollViewProps = {
+export type AutoScrollViewProps<ITEM, CONTAINER_PROPS> = {
     autoscroll?: boolean
     duration?: number
-} & PagerViewProps
+} & ContainerViewProps<ITEM>
 
 
 const DEFAULT_AUTOSCROLL_DURATION = 5000
@@ -19,22 +19,23 @@ const DEFAULT_AUTOSCROLL_DURATION = 5000
 /**
  * This view duplicates the data for infinite scroll in case of single item we are not even using simple view as a container skip duplication logic if loop is false
  */
-class AutoScrollView extends React.Component<AutoScrollViewProps, AutoScrollViewState> {
+class AutoScrollView<ITEM, CONTAINER_PROPS> extends React.Component<AutoScrollViewProps<ITEM,CONTAINER_PROPS>, AutoScrollViewState> {
     public static defaultProps = {
         autoscroll: true,
         duration: DEFAULT_AUTOSCROLL_DURATION,
     };
 
-    private pagerViewRef: React.RefObject<PagerView>;
+    // private pagerViewRef: React.RefObject<ContainerView<ITEM, CONTAINER_PROPS>>;
+    private timerInterval: NodeJS.Timeout;
+    private pagerViewRef: React.RefObject<any>;
 
-    constructor(props: AutoScrollViewProps) {
+    constructor(props: AutoScrollViewProps<ITEM,CONTAINER_PROPS>) {
         super(props);
         this.pagerViewRef = React.createRef();
-        const timerInterval = this.getTimer()
+        this.timerInterval = this.getTimer()
         this.state = {
             autoscroll: props.autoscroll,
             duration: props.duration,
-            timerInterval
         }
     }
 
@@ -44,11 +45,12 @@ class AutoScrollView extends React.Component<AutoScrollViewProps, AutoScrollView
 
     onScrollAnimationEnd = () => {
         // console.log('DRAGGING END')
-        this.setState({isDragging: false, timerInterval: this.getTimer()})
+        this.timerInterval = this.getTimer()
+        this.setState({isDragging: false})
     }
 
     onScrollBeginDrag = () => {
-        this.state.timerInterval && clearInterval(this.state.timerInterval)
+        this.timerInterval && clearInterval(this.timerInterval)
         this.setState({isDragging: true})
     }
 
@@ -60,28 +62,30 @@ class AutoScrollView extends React.Component<AutoScrollViewProps, AutoScrollView
         this.pagerViewRef && this.pagerViewRef.current && this.pagerViewRef.current.moveToNext(true)
     }
 
-    static getDerivedStateFromProps(nextProps: AutoScrollViewProps, prevState: AutoScrollViewState): AutoScrollViewState {
-        if (nextProps.autoscroll !== prevState.autoscroll
-            || nextProps.duration !== prevState.duration) {
-            prevState.timerInterval && clearInterval(prevState.timerInterval)
-            //TODO: Recreate the timer again
-            // const timerInterval = nextProps.autoscroll ? setInterval(undefined, nextProps.duration): undefined
-            return {
+    UNSAFE_componentWillReceiveProps(nextProps: Readonly<AutoScrollViewProps<ITEM,CONTAINER_PROPS>>, nextContext: any) {
+        if (nextProps.autoscroll !== this.state.autoscroll
+            || nextProps.duration !== this.state.duration) {
+            this.timerInterval && clearInterval(this.timerInterval)
+
+            this.setState({
                 autoscroll: nextProps.autoscroll,
                 duration: nextProps.duration,
-                // timerInterval: getTim
-            };
-        } else return null;
+            }, () => {
+                this.timerInterval = this.getTimer()
+            });
+        }
     }
 
     componentWillUnmount() {
-        this.state.timerInterval && clearInterval(this.state.timerInterval)
+        this.timerInterval && clearInterval(this.timerInterval)
     }
 
     render() {
-        return <PagerView
+        const {autoscroll, duration, ...rest} = this.props
+
+        return <CarouselContainer
             ref={this.pagerViewRef}
-            {...this.props}
+            {...rest}
             // @ts-ignore
             onScrollEndDrag={this.onScrollAnimationEnd}
             onScrollBeginDrag={this.onScrollBeginDrag}
