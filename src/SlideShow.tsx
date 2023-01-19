@@ -29,7 +29,8 @@ interface SlidShowProps {
         bottom: number,
         left: number,
         right: number,
-    }
+    },
+    renderDots?: React.FC
 }
 
 let itemWidth: number
@@ -45,7 +46,8 @@ const SlideShow = (
         autoScroll,
         disableIndicator,
         recyclerViewProps,
-        loop
+        loop,
+        renderDots
     }: SlidShowProps
 ) => {
     const multiplierValidated = items.length === 1 ? 0 : multiplier
@@ -149,10 +151,10 @@ const SlideShow = (
                 onVisibleIndicesChanged={onVisibleIndicesChange}
                 applyWindowCorrection={applyWindowCorrection}
             />}
-            {!disableIndicator && <View style={indicatorStyle}>
+            {!disableIndicator && (renderDots || <View style={indicatorStyle}>
                 <DefaultViewPageIndicator activePage={0} pageCount={items.length} scrollOffset={0}
                                           scrollValue={scrollValue.current}/>
-            </View>
+            </View>)
             }
         </View>
     );

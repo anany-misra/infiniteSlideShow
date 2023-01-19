@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import * as React from 'react';
 import { FlexAlignType } from 'react-native';
 import { RecyclerListViewProps } from "recyclerlistview/dist/reactnative/core/RecyclerListView";
 interface SlidShowProps {
@@ -22,9 +22,10 @@ interface SlidShowProps {
         left: number;
         right: number;
     };
+    renderDots?: React.FC;
 }
 declare const SlideShow: {
-    ({ initialIndex, duration, items, rowRenderer, multiplier, style, indicatorStyle, autoScroll, disableIndicator, recyclerViewProps, loop }: SlidShowProps): JSX.Element;
+    ({ initialIndex, duration, items, rowRenderer, multiplier, style, indicatorStyle, autoScroll, disableIndicator, recyclerViewProps, loop, renderDots }: SlidShowProps): JSX.Element;
     defaultProps: {
         initialIndex: number;
         duration: number;
