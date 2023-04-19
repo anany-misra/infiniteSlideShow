@@ -22,6 +22,17 @@ interface SlidShowProps {
         left: number;
         right: number;
     };
+    dotStyle?: {
+        borderColor?: string;
+        borderSize?: number;
+        backgroundColor?: string;
+      };
+    activeDotStyle?: {
+        borderSize?: number;
+        borderColor?: string;
+        backgroundColor?: string;
+    };
+    renderDots?: React.FC;
 }
 declare const SlideShow: {
     ({ initialIndex, duration, items, rowRenderer, multiplier, style, indicatorStyle, autoScroll, disableIndicator, recyclerViewProps, loop }: SlidShowProps): JSX.Element;
