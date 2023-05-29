@@ -9,6 +9,16 @@ interface Props {
     scrollOffset: number;
     scrollValue: Animated.Value;
     goToPage?: (page: number) => void;
+    dotStyle?: {
+        borderColor?: string;
+        borderSize?: number;
+        backgroundColor?: string;
+    };
+    activeDotStyle?: {
+        borderSize?: number;
+        borderColor?: string;
+        backgroundColor?: string;
+    };
 }
 declare class DefaultViewPageIndicator extends React.Component<Props, State> {
     constructor(props: any);

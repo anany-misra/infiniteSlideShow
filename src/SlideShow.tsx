@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState, useCallback} from 'react';
 import {Animated, Dimensions, FlexAlignType, View} from 'react-native';
 import {RecyclerListView} from 'recyclerlistview';
 import CustomBaseScrollView from './CustomBaseScrollView';
@@ -39,6 +39,8 @@ interface SlidShowProps {
     backgroundColor?: string;
     };
     renderDots?: React.FC;
+    recyclerRef?: React.MutableRefObject<any>;
+    onDragBegin?: () => void;
 }
 
 let itemWidth: number
@@ -58,6 +60,8 @@ const SlideShow = (
         dotStyle,
         activeDotStyle,
         renderDots,
+        recyclerRef,
+        onDragBegin
     }: SlidShowProps
 ) => {
     const multiplierValidated = items.length === 1 ? 0 : multiplier
@@ -134,6 +138,7 @@ const SlideShow = (
     }
 
     const onScrollBeginDrag = () => {
+        onDragBegin && onDragBegin()
         setIsPlaying(false)
     }
 
@@ -141,6 +146,13 @@ const SlideShow = (
         windowCorrection.startCorrection = WINDOW_CORRECTION_INSET
         windowCorrection.endCorrection = -WINDOW_CORRECTION_INSET
     }
+
+    const recyclerViewRef = useCallback((el)=>{
+        recyclerList.current = el
+        if(recyclerRef){
+            recyclerRef.current = el
+        }
+    },[])
 
     //Only render RLV once you have the data
     return (
@@ -150,7 +162,7 @@ const SlideShow = (
                 initialRenderIndex={intialialScrollIndex}
                 onLayout={onItemLayout}
                 onScroll={onScroll}
-                ref={recyclerList}
+                ref={recyclerViewRef}
                 isHorizontal
                 onScrollEndDrag={onScrollAnimationEnd}
                 onScrollBeginDrag={onScrollBeginDrag}
