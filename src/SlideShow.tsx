@@ -94,10 +94,10 @@ const SlideShow = (
 
     useEffect(()=>{
         if(recyclerRef?.current){
-            const intialialScrollIndex = (multiplierValidated / 2) * items?.length + initialIndex
+            const intialialScrollIndex = (multiplierValidated / 2) * items.length + initialIndex
             setCurrentIndexFake(intialialScrollIndex)
             scrollToIndex(intialialScrollIndex,false)
-            recyclerRef?.current?.forceUpdate()
+            recyclerRef.current?.forceUpdate?.()
         }
     },[items, multiplierValidated, setCurrentIndexFake, scrollToIndex, recyclerRef])
 
