@@ -88,9 +88,18 @@ const SlideShow = (
 
 
     // let scrollValue = new Animated.Value(0)
-    const scrollToIndex = (index: number, animation: boolean) => {
+    const scrollToIndex = useCallback((index: number, animation: boolean) => {
         recyclerList && recyclerList.current && recyclerList.current.scrollToIndex(index, animation)
-    }
+    },[recyclerList])
+
+    useEffect(()=>{
+        if(recyclerRef?.current){
+            const intialialScrollIndex = (multiplierValidated / 2) * items?.length + initialIndex
+            setCurrentIndexFake(intialialScrollIndex)
+            scrollToIndex(intialialScrollIndex,false)
+            recyclerRef?.current?.forceUpdate()
+        }
+    },[items, multiplierValidated, setCurrentIndexFake, scrollToIndex, recyclerRef])
 
     const onPageSelected = (position) => {
         if (position === 0 || position === multiplierValidated * items.length) {
@@ -173,7 +182,7 @@ const SlideShow = (
                 onVisibleIndicesChanged={onVisibleIndicesChange}
                 applyWindowCorrection={applyWindowCorrection}
             />}
-            {!disableIndicator && (renderDots || <View style={indicatorStyle}>
+            {!disableIndicator ? (renderDots || <View style={indicatorStyle}>
                 <DefaultViewPageIndicator
                     activePage={0}
                     pageCount={items.length}
@@ -182,7 +191,7 @@ const SlideShow = (
                     scrollOffset={0}
                     scrollValue={scrollValue.current}/>
             </View>
-            )}
+            ) : null}
         </View>
     );
 }
