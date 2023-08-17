@@ -27,6 +27,7 @@ export default class CustomBaseScrollView extends BaseScrollView {
                 showsHorizontalScrollIndicator={false}
                 pagingEnabled
                 decelerationRate={'fast'}
+                disableIntervalMomentum
             >
                 {this.props.children}
             </ScrollView>

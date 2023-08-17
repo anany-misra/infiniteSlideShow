@@ -173,7 +173,7 @@ const SlideShow = (
                 onVisibleIndicesChanged={onVisibleIndicesChange}
                 applyWindowCorrection={applyWindowCorrection}
             />}
-            {!disableIndicator && (renderDots || <View style={indicatorStyle}>
+            {!disableIndicator ? (renderDots || <View style={indicatorStyle}>
                 <DefaultViewPageIndicator
                     activePage={0}
                     pageCount={items.length}
@@ -182,7 +182,7 @@ const SlideShow = (
                     scrollOffset={0}
                     scrollValue={scrollValue.current}/>
             </View>
-            )}
+            ) : null}
         </View>
     );
 }
